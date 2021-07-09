@@ -1,48 +1,47 @@
-import React from 'react';
-import {StatusBar, Text, StyleSheet, horizontal} from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ProfilePage from './pages/profile';
-import TasksPage from './pages/tasks';
-import DashboardPage from './pages/dashboard';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { size } from 'lodash';
-const App = () => {
+import React, {useEffect} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
 
-  const Tab = createBottomTabNavigator();
+import {PermissionsAndroid, Platform} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
 
+import Parent from './pages/main/parent';
+
+navigator.geolocation = require('@react-native-community/geolocation')
+
+export default function Navigation() {
+  const androidPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'CTLTaxi App Camera Permission',
+          message:
+            'CTLTaxi App needs access to your location ' +
+            'so you can take awesome rides.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use location');
+      } else {
+        console.log('location permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  useEffect(() => { }, []);
+      if (Platform.OS === 'android'){
+        androidPermission();
+      }else {
+        Geolocation.requestAuthorization();
+      }
   return (
-    <>
-      <StatusBar barStyle="light-content" />
-      <NavigationContainer>
-        <Tab.Navigator screenOptions={({ route }) => ({
-            tabBarIcon: ({ color }) => {
-              let icon;
-              // Set different 'icons' for each route
-              if (route.name === 'Dashboard') {
-                icon = <Icon name="gauge-simple" size={20} color= {color} />
-              } else if (route.name === 'Tasks') {
-                icon = <Icon name="list" size={15} color= {color} />
-              } else if (route.name === 'Profile') {
-                icon = <Icon name="user" size={20} color= {color} />
-              }
-
-              // You can return any component that you like here!
-              return <Text style={{color: color}}>{icon}</Text>;
-            },
-          })}
-          tabBarOptions={{
-            activeBackgroundColor: 'grey',
-            activeTintColor: 'blue',
-            inactiveTintColor: 'grey',
-          }}>
-          <Tab.Screen name="Dashboard" component={DashboardPage} />
-          <Tab.Screen name="Tasks" component={TasksPage} />
-          <Tab.Screen name="Profile" component={ProfilePage} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </>
+    <NavigationContainer>
+      <Parent />
+    </NavigationContainer>
   );
-};
-
-export default App;
+}
